@@ -2,12 +2,12 @@
 
 # 参考https://github.com/openai/gym/blob/master/gym/envs/toy_text/frozen_lake.py
 # 和https://github.com/openai/gym/blob/master/gym/envs/toy_text/discrete.py
-import gym
+from gym import Env, spaces
 
-class MazeEnv(gym.Env):
+class MazeEnv(Env):
     def __init__(self):
-        self.observation_space = gym.spaces.Discrete(4*4) #状态空间，代表处于4*4棋盘的某个格子中
-        self.action_space = gym.spaces.Discrete(4) #动作集合，即上下左右
+        self.observation_space = spaces.Discrete(4*4) #状态空间，代表处于4*4棋盘的某个格子中
+        self.action_space = spaces.Discrete(4) #动作集合，即上下左右
 
         self.P = {s : {a : [] for a in range(4)} for s in range(4*4)} #状态转移表
         for s in range(4*4):
@@ -22,6 +22,7 @@ class MazeEnv(gym.Env):
         self.dir = {0:'Up', 1:'Down', 2:'Left', 3:'Right'}
         
         self.lastaction=None
+        self.laststate=None
         self.s = 0
         self.viewer = None
         self.round = 0
@@ -49,6 +50,7 @@ class MazeEnv(gym.Env):
         # 一定从左上角作为起始点
         self.s = 0
         self.lastaction = None
+        self.laststate = None
         self.times = 0
         self.round = self.round+1
         return self.s
@@ -57,6 +59,7 @@ class MazeEnv(gym.Env):
         if self.P[self.s][action] == []:
             return (-1,0,False,{})
         p, s, r, d = self.P[self.s][action][0]
+        self.laststate = self.s
         self.s = s
         self.lastaction = action
         self.times = self.times+1
@@ -70,7 +73,3 @@ class MazeEnv(gym.Env):
         #     from gym.envs.classic_control import rendering
         #     self.viewer = rendering.Viewer(screen_width, screen_height)
         print("Round = %d, step = %d, current state = %d, last action = %s"%(self.round, self.times, self.s, self.dir[self.lastaction]))
-
-
-
-
