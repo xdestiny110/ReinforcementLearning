@@ -27,6 +27,12 @@ class MazeEnv(Env):
         self.viewer = None
         self.times = 0
 
+        self.agent_view_trans = None
+        self.screen_width = self.screen_height = 650
+        self.unit_width = self.unit_height = 150
+        self.offset_width = (self.screen_width-self.unit_width*4)/2
+        self.offset_height = (self.screen_height-self.unit_height*4)/2
+
         self.seed()
         self.reset()
 
@@ -37,10 +43,13 @@ class MazeEnv(Env):
 
     def _get_reward(self, state):
         if (state == 6) or (state == 9):
-            return -1
+            return -100
         elif state == 10:
-            return 1
-        return 0
+            return 100
+        return -1
+
+    def _get_loc(self):
+        return self.s // 4, self.s % 4
 
     def seed(self, seed=None):
         pass
@@ -64,10 +73,43 @@ class MazeEnv(Env):
         return (s, r, d, {"prob" : p})
 
     def render(self, mode='human'):
-        # screen_width = screen_height = 600
-        # scale = screen_height/4
+        if self.viewer is None:
+            from gym.envs.classic_control import rendering
+            self.viewer = rendering.Viewer(self.screen_width, self.screen_height)
 
-        # if self.viewer is None:
-        #     from gym.envs.classic_control import rendering
-        #     self.viewer = rendering.Viewer(screen_width, screen_height)
+            lines = []
+            for i in range(4):
+                lines.append(rendering.Line((self.offset_width+i*self.unit_width, self.offset_height),(self.offset_width+i*self.unit_width, self.screen_height-self.offset_height)))
+                lines[-1].set_color(0,0,0)
+                lines.append(rendering.Line((self.offset_width, self.offset_height+i*self.unit_height),(self.screen_width-self.offset_width, self.offset_height+i*self.unit_height)))
+                lines[-1].set_color(0,0,0)
+
+            traps = []
+            traps.append(rendering.make_circle(50))
+            traps[-1].add_attr(rendering.Transform(translation=(1.5*self.unit_width+self.offset_width,2.5*self.unit_height+self.offset_height)))
+            traps[-1].set_color(1,0,0)
+            traps.append(rendering.make_circle(50))
+            traps[-1].add_attr(rendering.Transform(translation=(2.5*self.unit_width+self.offset_width,1.5*self.unit_height+self.offset_height)))
+            traps[-1].set_color(1,0,0)
+
+            gold = rendering.make_circle(50)
+            gold.add_attr(rendering.Transform(translation=(2.5*self.unit_width+self.offset_width,2.5*self.unit_height+self.offset_height)))
+            gold.set_color(1,1,0)
+
+            for v in lines:
+                self.viewer.add_geom(v)
+            for v in traps:
+                self.viewer.add_geom(v)
+            self.viewer.add_geom(gold)
+
+            agent_view = rendering.make_circle(50)
+            ix, iy = self._get_loc()
+            self.agent_view_trans = rendering.Transform()
+            agent_view.add_attr(self.agent_view_trans)
+            agent_view.set_color(0,1,0)
+            self.viewer.add_geom(agent_view)
+
         print("step = %d, current state = %d"%(self.times, self.s))
+        ix, iy = self._get_loc()
+        self.agent_view_trans.set_translation(newx = (0.5+ix)*self.unit_width+self.offset_width, newy = (0.5+iy)*self.unit_height+self.offset_height)
+        return self.viewer.render(return_rgb_array = mode == 'rgb_array')
