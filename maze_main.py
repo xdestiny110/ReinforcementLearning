@@ -19,11 +19,14 @@ for round in range(100):
 print("================")
 print("solve")
 env.reset()
+env.render()
 is_terminted = False
 while not is_terminted:
     act = qlearning.choose_best_action()
     print(env.dir[act])
     _, _, is_terminted, _ = env.step(act)
+    env.render()
+    time.sleep(1)
 
 print("================")
 print("q_table:")

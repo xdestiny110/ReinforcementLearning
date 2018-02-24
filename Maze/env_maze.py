@@ -7,7 +7,7 @@ from gym import Env, spaces
 class MazeEnv(Env):
     def __init__(self):
         self.observation_space = spaces.Discrete(4*4) #状态空间，代表处于4*4棋盘的某个格子中
-        self.action_space = spaces.Discrete(4) #动作集合，即上下左右
+        self.action_space = spaces.Discrete(4) #动作集合
 
         self.P = {s : {a : [] for a in range(4)} for s in range(4*4)} #状态转移表
         for s in range(4*4):
@@ -19,7 +19,7 @@ class MazeEnv(Env):
                 self.P[s][2].append((1, s-1, self._get_reward(s-1), self._check_terminate(s-1)))
             if s%4 != 3:
                 self.P[s][3].append((1, s+1, self._get_reward(s+1), self._check_terminate(s+1)))
-        self.dir = {0:'Up', 1:'Down', 2:'Left', 3:'Right'}
+        self.dir = {0:'Left', 1:'Right', 2:'Down', 3:'Up'}
         
         self.lastaction=None
         self.laststate=None
@@ -55,7 +55,7 @@ class MazeEnv(Env):
         pass
 
     def reset(self):
-        # 一定从左上角作为起始点
+        # 一定从右下角作为起始点
         self.s = 0
         self.lastaction = None
         self.laststate = None
@@ -74,6 +74,7 @@ class MazeEnv(Env):
 
     def render(self, mode='human'):
         if self.viewer is None:
+            # 注意绘制坐标系原点在左下角
             from gym.envs.classic_control import rendering
             self.viewer = rendering.Viewer(self.screen_width, self.screen_height)
 

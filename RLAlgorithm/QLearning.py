@@ -2,7 +2,7 @@
 import numpy as np
 
 class QLearning():
-    def __init__(self, env, learning_rate = 1, reward_decay = 0.9, e_greedy = 0.95):
+    def __init__(self, env, learning_rate = 1, reward_decay = 0.9, e_greedy = 0.9):
         self.lr = learning_rate
         self.reward_decay = reward_decay
         self.e_greedy = e_greedy
