@@ -25,7 +25,6 @@ class MazeEnv(Env):
         self.laststate=None
         self.s = 0
         self.viewer = None
-        self.round = 0
         self.times = 0
 
         self.seed()
@@ -52,7 +51,6 @@ class MazeEnv(Env):
         self.lastaction = None
         self.laststate = None
         self.times = 0
-        self.round = self.round+1
         return self.s
 
     def step(self, action):
@@ -72,4 +70,4 @@ class MazeEnv(Env):
         # if self.viewer is None:
         #     from gym.envs.classic_control import rendering
         #     self.viewer = rendering.Viewer(screen_width, screen_height)
-        print("Round = %d, step = %d, current state = %d, last action = %s"%(self.round, self.times, self.s, self.dir[self.lastaction]))
+        print("step = %d, current state = %d"%(self.times, self.s))

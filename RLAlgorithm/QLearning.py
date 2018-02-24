@@ -13,15 +13,15 @@ class QLearning():
         if self.env.s not in self.q_table:
             self.q_table[self.env.s] = {x : 0 for x in range(self.env.action_space.n)}
         
-        actions_list = list(self.env.P[self.env.s].keys()) # 依据状态转移表获得该状态下有效的动作
+        actions_list = self.env.P[self.env.s] # 依据状态转移表获得该状态下有效的动作
+        
         #动作选取策略是采用贪婪还是随机
-        if np.random.uniform() < self.e_greedy:            
-            state_action = self.q_table[self.env.s]
-            state_action_sorted = sorted(state_action.items(), key=lambda a : a[1]) # 依据Q-value进行排序
-            for k, _ in state_action_sorted:
-                if actions_list[k] != []:
-                    action = k
-                    break
+        if np.random.uniform() < self.e_greedy:
+            # 去掉无效的动作
+            state_action = [(k,v) for k,v in self.q_table[self.env.s].items() if actions_list[k] != []] 
+            # Q-value有可能相同，因此先打乱再使用max
+            np.random.shuffle(state_action)
+            action = max(state_action, key = lambda x: x[1])[0]
         else:
             action = self.env.action_space.sample()
             while actions_list[action] == []:
@@ -32,5 +32,5 @@ class QLearning():
         q_predict = self.q_table[last_state][action]
         q_target = reward
         if is_terminted == False:
-            q_target += self.reward_decay*np.max(self.q_table[state])[1]
+            q_target += self.reward_decay*np.max(self.q_table[last_state])[1]
         self.q_table[last_state][action] += self.lr*(q_target-q_predict)
